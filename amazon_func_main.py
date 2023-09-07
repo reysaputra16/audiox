@@ -7,7 +7,6 @@ import json
 import sys
 
 AWS_REGION = 'ap-southeast-1'
-session = boto3.Session(profile_name='web')
 s3_client = boto3.client(
     's3',
     aws_access_key_id=sys.argv[1],
