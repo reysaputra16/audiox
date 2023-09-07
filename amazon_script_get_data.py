@@ -9,5 +9,4 @@ def get_data_for_php():
    str_object = str_object[:-1]
    return str_object
 
-if __name__ == "__main__":
-   print(get_data_for_php())
+print(get_data_for_php())
