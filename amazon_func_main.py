@@ -4,10 +4,20 @@ import amazon_func_transcribe as transcribe
 from time import sleep
 import urllib.request
 import json
+import sys
 
 AWS_REGION = 'ap-southeast-1'
-s3_client = boto3.client('s3')
-transcribe_client = boto3.client('transcribe')
+session = boto3.Session(profile_name='web')
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=sys.argv[1],
+    aws_secret_access_key=sys.argv[2],
+    )
+transcribe_client = boto3.client(
+    'transcribe',
+    aws_access_key_id=sys.argv[1],
+    aws_secret_access_key=sys.argv[2],
+    )
 s3_uri_bucket = "transcribebucket-sisnet"
 s3_uri_root = "s3://" + s3_uri_bucket
 mediaFormat = 'mp3'
