@@ -1,3 +1,6 @@
+import sys
+sys.path.append("..")
+
 import tkinter
 from tkinter.filedialog import askopenfilename
 import customtkinter
@@ -5,7 +8,7 @@ import amazon_func_main as main
 import amazon_func_s3 as s3
 import amazon_func_transcribe as transcribe
 import botocore.exceptions as botoe
-import App.scrollable_label_frame as slbf
+import scrollable_label_frame as slbf
 
 class App(customtkinter.CTk):
     def __init__(self):

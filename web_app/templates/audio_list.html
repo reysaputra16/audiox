@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Audio List | AudioX</title>
+{% endblock %}
+
+{% block body %}
+<nav>
+    <input type="checkbox" id="check">
+    <label for="check" class="checkbtn">
+        <i class="fas fa-bars"></i>
+    </label>
+    <label class="logo">AudioX</label>
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/upload">Upload</a></li>
+        <li><a class="active" href="/audio_list">Audio List</a></li>
+        <li><a href="/about">About</a></li>
+    </ul>
+</nav>
+<div class="content">
+    <h1 style="text-align: center;">Audio Files</h1>
+
+    <form style="padding:5px;padding-bottom: 10px;" enctype="multipart/form-data" action="/upload_file" method="POST">
+        <input type="file" name="file-to-save">
+        <input type="submit" value="Add Audio File">
+    </form>
+
+    <table>
+        <tr>
+            <th>File Name</th>
+            <th>Status</th>
+            <th>Foul Language</th>
+            <th>Transcription</th>
+            <th>Action</th>
+        </tr>
+        {% for audio_file in audio_files %}
+            <tr>
+                <td>{{ audio_file }}</td>
+                {% if transcribed[loop.index0] == 'Not Transcribed' %}
+                    <td><span style="color:grey;font-size:medium">{{ transcribed[loop.index0] }}</span></td>
+                {% elif transcribed[loop.index0] == 'In Progress' %}
+                    <td><span style="color:lightsalmon;font-size:medium">{{ transcribed[loop.index0] }}</span></td>
+                {% elif transcribed[loop.index0] == 'Failed' %}
+                    <td><span style="color:darkred;font-size:medium">{{ transcribed[loop.index0] }}</span></td>
+                {% else %}
+                    <td><span style="color:purple;font-size:medium">{{ transcribed[loop.index0] }}</span></td>
+                {% endif %}
+                    {% if is_bad[loop.index0] == 'Y' %}
+                        <td><span style="color:red;font-size:medium">Yes</span></td>
+                    {% elif is_bad[loop.index0] == 'U' %}
+                        <td><span style="color:grey;font-size:medium">Unknown</span></td>
+                    {% else %}
+                        <td><span style="color:green;font-size:medium">No</span></td>
+                    {% endif %}
+                <td>
+                    <p>{{ transcriptions[loop.index0] }}</p>
+                </td>
+                <td>
+                    <form action="/transcribe_file" method="post">
+                        <input type="hidden" name="filename" value="{{ audio_file }}">
+                        <input class="button button-green button-medium"
+                        type="submit" value="Transcribe">
+                    </form>
+                    <br>
+                    <form action="/delete_file" method="post">
+                        <input type="hidden" name="filename" value="{{ audio_file }}">
+                        <input class="button button-red button-medium" 
+                        type="submit" value="Delete">
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

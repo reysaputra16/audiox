@@ -8,6 +8,7 @@ import sys
 
 AWS_REGION = 'ap-southeast-1'
 s3_client = boto3.client('s3')
+s3_resource = boto3.resource('s3')
 transcribe_client = boto3.client('transcribe')
 s3_uri_bucket = "transcribebucket-sisnet"
 s3_uri_root = "s3://" + s3_uri_bucket

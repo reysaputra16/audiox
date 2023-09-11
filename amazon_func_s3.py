@@ -18,15 +18,18 @@ def delete_bucket(bucket_name, s3_client):
 
 
 def list_objects(bucket_name, s3_client):
-    response = s3_client.list_objects_v2(
-        Bucket=bucket_name
-    )
+    try:
+        response = s3_client.list_objects_v2(
+            Bucket=bucket_name
+        )
 
-    responseContent = response['Contents']
-    result = []
-    for obj in responseContent:
-        result.append(obj['Key'])
-    return result
+        responseContent = response['Contents']
+        result = []
+        for obj in responseContent:
+            result.append(obj['Key'])
+        return result
+    except KeyError:
+        return []
 
 def get_object(bucket_name, key_object, s3_client):
     response = s3_client.get_object(
@@ -40,3 +43,13 @@ def upload_file(fileLoc, s3_client, bucket_name, objName):
         s3_client.upload_file(fileLoc, bucket_name, objName)
     except botoe.ClientError:
         print("File does not exist.. Please make sure that the location is correct...")
+    else:
+        print("File successfully uploaded!")
+
+def delete_file(s3_client, bucket_name, key_name):
+    try:
+        s3_client.delete_object(Bucket=bucket_name, Key=key_name)
+    except botoe.ClientError:
+        print("Error deleting file..")
+    else:
+        print("File successfully deleted!")
