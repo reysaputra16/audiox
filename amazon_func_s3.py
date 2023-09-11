@@ -21,7 +21,12 @@ def list_objects(bucket_name, s3_client):
     response = s3_client.list_objects_v2(
         Bucket=bucket_name
     )
-    return response['Contents']
+
+    responseContent = response['Contents']
+    result = []
+    for obj in responseContent:
+        result.append(obj['Key'])
+    return result
 
 def get_object(bucket_name, key_object, s3_client):
     response = s3_client.get_object(

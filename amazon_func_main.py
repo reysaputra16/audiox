@@ -7,16 +7,8 @@ import json
 import sys
 
 AWS_REGION = 'ap-southeast-1'
-s3_client = boto3.client(
-    's3',
-    aws_access_key_id=sys.argv[1],
-    aws_secret_access_key=sys.argv[2],
-    )
-transcribe_client = boto3.client(
-    'transcribe',
-    aws_access_key_id=sys.argv[1],
-    aws_secret_access_key=sys.argv[2],
-    )
+s3_client = boto3.client('s3')
+transcribe_client = boto3.client('transcribe')
 s3_uri_bucket = "transcribebucket-sisnet"
 s3_uri_root = "s3://" + s3_uri_bucket
 mediaFormat = 'mp3'
@@ -64,6 +56,14 @@ def check_unwanted_words(unwantedWords, transcribe_client, object):
                 if unwantedWord in word:
                     return True
         return False  
+
+def get_data_for_php():
+   objects = s3.list_objects(s3_uri_bucket, s3_client)
+   str_object = ""
+   for obj in objects:
+      str_object += obj['Key'] + " "
+   str_object = str_object[:-1]
+   return str_object
 
 def check_all_transcripts():
     objectsBucket = s3.list_objects(s3_uri_bucket, s3_client)
