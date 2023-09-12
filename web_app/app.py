@@ -5,7 +5,8 @@ from flask import Flask, render_template, url_for, request, redirect
 from tkinter.filedialog import askopenfilename
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import botocore.exceptions as botoe
+import botocore
+
 import amazon_func_main as main
 import amazon_func_s3 as s3
 import amazon_func_transcribe as transcribe
@@ -31,21 +32,30 @@ class DetectedFiles(db.Model):
     def __repr__(self):
         return '<DetectedFiles %r>' % self.filename
 
+class UnwantedWords(db.Model):
+    word = db.Column(db.String(100), primary_key=True, nullable=False)
+
+    def __repr__(self):
+        return'<UnwantedWords %r>' % self.word
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 class AudioFiles():
     FILE_UPLOAD = ""
     #TODO: Make sure the unwanted words are stored in a database
-    unwanted_words = ["busuk", "benci", "sialan", "bodoh"]
 
 #Define audio files class as variable
 audio_files = AudioFiles()
 
 def check_unwanted_words(split_transcription):
+    query = UnwantedWords.query.all()
+    unwanted_words = []
+    for row in query:
+        unwanted_words.append(row.word)
     bool_bad = 'N'
     for word in split_transcription:
-        if word in audio_files.unwanted_words:
+        if word in unwanted_words:
             bool_bad = 'Y'
             break
     return bool_bad
@@ -95,19 +105,17 @@ def index():
                 is_bad.append(bool_append)
                 if bool_append == 'Y':
                     new_audio_file = DetectedFiles(filename=file, transcription=transcription, 
-                                                    completed=1, foul_lang=1)
+                                                    completed=1, foul_lang=2)
                     upload_to_db(new_audio_file)
+                    s3.download_file(main.s3_client, main.s3_uri_bucket, file)
                     
 
     return render_template("audio_list.html", audio_files=list_audio_files, transcribed=is_transcribed,
-                           transcriptions=transcriptions, is_bad=is_bad)
+                            transcriptions=transcriptions, is_bad=is_bad, error="0")
 
-@app.route("/detected_audio")
+@app.route("/assessment")
 def detected_audio():
     audio_files = DetectedFiles.query.all()
-    if len(audio_files) == 0:
-        audio_file = DetectedFiles(filename="Test", transcription="Bodoh kamu", completed=0, foul_lang=1)
-        upload_to_db(audio_file)
     return render_template("detected_audio_list.html", files=DetectedFiles.query.all())
 
 @app.route("/upload_file", methods=['POST', 'GET'])
@@ -115,6 +123,17 @@ def upload_file():
     #For now, just redirect to the audio list page
     return redirect("/audio_list")
 
+@app.route("/transcribe_file", methods=['POST', 'GET'])
+def transcribe_file():
+    if request.method == 'POST':
+        file_name = request.form['filename']
+        print("Starting Transcription Job for " + file_name + "...")
+        transcribe.start_transcribe_job(file_name, main.languageCode, main.mediaFormat, main.s3_uri_root + "/" + file_name,
+                                        main.transcribe_client)
+        return redirect("/audio_list")
+    else:
+        return redirect("/audio_list")
+    
 @app.route("/delete_file", methods=['POST', 'GET'])
 def delete_file():
     if request.method == 'POST':
@@ -131,22 +150,96 @@ def delete_file():
     else:
         return redirect("/audio_list")
 
-@app.route("/transcribe_file", methods=['POST', 'GET'])
-def transcribe_file():
+@app.route("/no_foul_language", methods=['POST', 'GET'])
+def no_foul_language():
     if request.method == 'POST':
         file_name = request.form['filename']
-        print("Starting Transcription Job for " + file_name + "...")
-        transcribe.start_transcribe_job(file_name, main.languageCode, main.mediaFormat, main.s3_uri_root + "/" + file_name,
-                                        main.transcribe_client)
-        return redirect("/audio_list")
-    else:
-        return redirect("/audio_list")
+        print("Got filename! " + file_name)
+        updated_file = DetectedFiles.query.filter_by(filename=file_name).first()
+        updated_file.completed = 2
+        updated_file.foul_lang = 0
+        print("Got file from DB")
+        db.session.add(updated_file)
+        db.session.commit()
+    
+    return redirect("/assessment")
+
+@app.route("/foul_language", methods=['POST', 'GET'])
+def foul_language():
+    if request.method == 'POST':
+        file_name = request.form['filename']
+        print("Got filename! " + file_name)
+        updated_file = DetectedFiles.query.filter_by(filename=file_name).first()
+        updated_file.completed = 2
+        updated_file.foul_lang = 1
+        print("Got file from DB")
+
+        db.session.add(updated_file)
+        db.session.commit()
+
+    return redirect("/assessment")
+
+@app.route("/revert_assessment", methods=['POST'])
+def revert_assessment():
+    if request.method == 'POST':
+        file_name = request.form['filename']
+        print("Got filename! " + file_name)
+        updated_file = DetectedFiles.query.filter_by(filename=file_name).first()
+        updated_file.completed = 1
+        updated_file.foul_lang = 2
+        print("Got file from DB")
+
+        db.session.add(updated_file)
+        db.session.commit()
+
+    return redirect("/assessment")
+
+@app.route("/download_file", methods=['POST'])
+def download_file():
+    if request.method == 'POST':
+        file_name = request.form['filename']
+        s3.download_file(main.s3_client, main.s3_uri_bucket, file_name)
+    return redirect("/assessment")
     
 @app.route("/upload")
 def upload_page():
     return render_template("upload.html")
 
-@app.route("/about")
+@app.route("/about", methods=['POST', 'GET'])
 def about_page():
-    return render_template("about.html")
+    if request.method == 'POST':
+        main.s3_uri_bucket = request.form['bucket_name']
+        main.AWS_REGION = request.form['aws_region']
+        main.languageCode = request.form['transcript_lang']
+        print("Updated...")
+        print("Bucket name: " + main.s3_uri_bucket)
+        print("AWS Region: " + main.AWS_REGION)
+        print("Transcript Language: " + main.languageCode)
+    return render_template("about.html", bucket_name=main.s3_uri_bucket,
+                           aws_region=main.AWS_REGION, transcript_lang=main.languageCode,
+                           words=UnwantedWords.query.all())
+
+@app.route("/add_word", methods=['POST'])
+def add_word():
+    if request.method == 'POST':
+        queryWords = UnwantedWords.query.all()
+        listWords = []
+        new_word = request.form['word_to_add']
+        for query in queryWords:
+            listWords.append(query.word)
+        if new_word in listWords:
+            print("ERROR: Word already exists")
+        else:
+            word_to_add = UnwantedWords(word=new_word)
+            db.session.add(word_to_add)
+            db.session.commit()
+        return redirect("/about")
+
+@app.route("/remove_word", methods=['POST'])
+def remove_word():
+    if request.method == 'POST':
+        new_word = request.form['word_to_remove']
+        UnwantedWords.query.filter_by(word=new_word).delete()
+        db.session.commit()
+    return redirect("/about")
     

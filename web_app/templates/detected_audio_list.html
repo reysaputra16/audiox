@@ -15,16 +15,15 @@
         <li><a href="/">Home</a></li>
         <li><a href="/upload">Upload</a></li>
         <li><a href="/audio_list">Audio List</a></li>
-        <li><a class="active" href="/detected_audio">Detected Audio</a></li>
+        <li><a class="active" href="/assessment">Assessment</a></li>
         <li><a href="/about">About</a></li>
     </ul>
 </nav>
 <div class="content">
-    <h1 style="text-align: center;">Detected Audio</h1>
+    <h1 style="text-align: center;">Assessment</h1>
 
     <table>
         <tr>
-            <th>ID</th>
             <th>File Name</th>
             <th>Status</th>
             <th>Foul Language</th>
@@ -33,16 +32,47 @@
         </tr>
         {% for file in files %}
             <tr>
-                <td>{{ file.id }}</td>
                 <td>{{ file.filename }}</td>
                 {% if file.completed == 1 %}
                     <td><span style="color: orange;font-size: medium;">Marked For Assessment</span></td>
                 {% else %}
                     <td><span style="color: green;font-size: medium;">Assessment Complete</span></td>
                 {% endif %}
-                <td>Yes</td>
+                {% if file.foul_lang == 2 %}
+                    <td><span style="color: grey;font-size: medium;">Known after assessment</span></td>
+                {% elif file.foul_lang == 1 %}
+                    <td><span style="color: red;font-size: medium;">Yes</span></td>
+                {% elif file.foul_lang == 0 %}
+                    <td><span style="color: green;font-size: medium;">No</span></td>
+                {% else %}
+                    <td>Unknown</td>
+                {% endif %}
                 <td>{{ file.transcription }}</td>
-                <td>No actions</td>
+                <td>
+                    {% if file.completed == 1 %}
+                        <form action="/no_foul_language" method="post">
+                            <input type="hidden" name="filename" value="{{ file.filename }}">
+                            <input class="button button-green button-medium"
+                            type="submit" value="Not Foul Language">
+                        </form>
+                        <form action="/foul_language" method="post">
+                            <input type="hidden" name="filename" value="{{ file.filename }}">
+                            <input class="button button-deep-pink button-medium"
+                            type="submit" value="Foul Language">
+                        </form>
+                    {% elif file.completed == 2 %}
+                        <form action="/revert_assessment" method="post">
+                            <input type="hidden" name="filename" value="{{ file.filename }}">
+                            <input class="button button-grey-blue button-medium"
+                            type="submit" value="Revert Assessment">
+                        </form>
+                    {% endif %}
+                    <form action="/delete_file" method="post">
+                        <input type="hidden" name="filename" value="{{ file.filename }}">
+                        <input class="button button-red button-medium" 
+                        type="submit" value="Delete">
+                    </form>
+                </td>
             </tr>
         {% endfor %}
     </table>

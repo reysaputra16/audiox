@@ -15,7 +15,7 @@
         <li><a href="/">Home</a></li>
         <li><a href="/upload">Upload</a></li>
         <li><a class="active" href="/audio_list">Audio List</a></li>
-        <li><a href="/detected_audio">Detected Audio</a></li>
+        <li><a href="/assessment">Assessment</a></li>
         <li><a href="/about">About</a></li>
     </ul>
 </nav>
@@ -48,7 +48,7 @@
                     <td><span style="color:purple;font-size:medium">{{ transcribed[loop.index0] }}</span></td>
                 {% endif %}
                     {% if is_bad[loop.index0] == 'Y' %}
-                        <td><span style="color:red;font-size:medium">Yes</span></td>
+                        <td><span style="color:red;font-size:medium">Detected. See Assessment</span></td>
                     {% elif is_bad[loop.index0] == 'U' %}
                         <td><span style="color:grey;font-size:medium">Unknown</span></td>
                     {% else %}

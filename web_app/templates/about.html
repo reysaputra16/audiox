@@ -15,12 +15,53 @@
         <li><a href="/">Home</a></li>
         <li><a href="/upload">Upload</a></li>
         <li><a href="/audio_list">Audio List</a></li>
-        <li><a href="/detected_audio">Detected Audio</a></li>
+        <li><a href="/assessment">Assessment</a></li>
         <li><a class="active" href="/about">About</a></li>
     </ul>
 </nav>
 <div class="content">
-    <h1>About</h1>
+    <h1 style="text-align: center;">Settings</h1>
+    <form action="/about" method="post">
+        <label for="bucket_name">S3 Bucket Name:    </label>
+        <input type="text" name="bucket_name" value="{{ bucket_name }}" disabled>
+        <br><br>
+        <label for="transcript_lang">Transcript Language:    </label>
+        <select name="transcript_lang">
+            <option value="id-ID">Indonesian</option>
+        </select>
+        <br><br>
+        <label for="aws_region">AWS Region:    </label>
+        <select name="aws_region">
+            <option value="ap-southeast-1">Asia Pacific (Singapore)</option>
+        </select>
+        <br><br>
+        <input type="submit" value="Update">
+    </form>
+    <br><br>
+    <form action="/add_word" method="post">
+        <label for="word_to_add">Add Word:    </label>
+        <input type="text" name="word_to_add">
+        <input type="submit" value="Add Word">
+    </form>
+    <br><br>
+    <form action="/remove_word" method="post">
+        <label for="word_to_remove">Remove Word:    </label>
+        <input type="text" name="word_to_remove">
+        <input type="submit" value="Remove Word">
+    </form>
+
+    <br><br><br><br>
+
+    <table>
+        <tr>
+            <th>Word</th>
+        </tr>
+        <tr>
+            {% for word in words %}
+                <td>{{ word.word }}</td>
+            {% endfor %}
+        </tr>
+    </table>
 </div>
 
 {% endblock %}

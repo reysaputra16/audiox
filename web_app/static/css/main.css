@@ -157,3 +157,15 @@ table {
     background-color: green;
     color: white;
 }
+
+.button-grey-blue {background-color: white; color:black;border: 2px solid grey} /* Grey (Blue when hover) */
+.button-grey-blue:hover {
+    background-color:cornflowerblue;
+    color: white;
+}
+
+.button-deep-pink {background-color: white; color:black;border: 2px solid deeppink} /* Red */
+.button-deep-pink:hover {
+    background-color:deeppink;
+    color: white;
+}

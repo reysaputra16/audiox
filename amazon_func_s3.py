@@ -53,3 +53,10 @@ def delete_file(s3_client, bucket_name, key_name):
         print("Error deleting file..")
     else:
         print("File successfully deleted!")
+
+def download_file(s3_client, bucket_name, key_name, file_loc="downloads"):
+    s3_client.download_file(
+        Bucket=bucket_name,
+        Key=key_name,
+        Filename=file_loc + "/" + key_name,
+    )
