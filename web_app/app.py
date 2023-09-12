@@ -10,42 +10,52 @@ import amazon_func_main as main
 import amazon_func_s3 as s3
 import amazon_func_transcribe as transcribe
 
-app = Flask(__name__, template_folder="templates")
 ALLOWED_EXTENSIONS = {'mp3'}
+
+app = Flask(__name__, template_folder="templates")
+with app.app_context():
+    """
+    Setting up a database
+    """
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+    db = SQLAlchemy(app)
+
+class DetectedFiles(db.Model):
+    id = db.Column(db.Integer, autoincrement=True)
+    filename = db.Column(db.String(100), primary_key=True, nullable=False)
+    transcription = db.Column(db.String(5000))
+    completed = db.Column(db.Integer, default=0)    #0=marked for assessment, 1=completed assessment
+    foul_lang = db.Column(db.Integer, default=0)    #0=no, 1=yes
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<DetectedFiles %r>' % self.filename
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-"""
-Optional: Settings for setting up a database
-"""
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-#db =SQLAlchemy(app)
-
 class AudioFiles():
     FILE_UPLOAD = ""
-    unwanted_words = ["busuk", "benci", "sialan"]
-    
-    def upload_file(self):
-        try:
-            self.FILE_UPLOAD = askopenfilename()
-            print(self.FILE_UPLOAD)
-            list_of_files = s3.list_objects(main.s3_uri_bucket, main.s3_client)
-            if self.FILE_UPLOAD.split("/")[-1] in list_of_files:
-                print("File with same name already exists!")
-                return render_template('index.html')
-            else:
-                s3.upload_file(self.FILE_UPLOAD, main.s3_client, main.s3_uri_bucket, self.FILE_UPLOAD.split("/")[-1])
-                print("File uploaded successful")
-                return render_template('index.html')
-        except botoe.ClientError:
-            print("Upload error!")
-            return render_template('index.html')
-        except FileNotFoundError:
-            print("File does not exist!")
-            return render_template('index.html')
+    #TODO: Make sure the unwanted words are stored in a database
+    unwanted_words = ["busuk", "benci", "sialan", "bodoh"]
 
+#Define audio files class as variable
 audio_files = AudioFiles()
+
+def check_unwanted_words(split_transcription):
+    bool_bad = 'N'
+    for word in split_transcription:
+        if word in audio_files.unwanted_words:
+            bool_bad = 'Y'
+            break
+    return bool_bad
+
+def upload_to_db(audioFileInfo):
+    try:
+        db.session.add(audioFileInfo)
+        db.session.commit()
+    except:
+        return "There was an issue adding the audio file to the database"
 
         
 @app.route("/")
@@ -81,30 +91,28 @@ def index():
                 transcription = transcribe.get_transcription(main.transcribe_client, file)
                 transcriptions.append(transcription)
                 split_transcription = transcription.split(" ")
-                bool_bad = 'N'
-                for word in split_transcription:
-                    if word in audio_files.unwanted_words:
-                        bool_bad = 'Y'
-                        break
-                is_bad.append(bool_bad)
+                bool_append = check_unwanted_words(split_transcription)
+                is_bad.append(bool_append)
+                if bool_append == 'Y':
+                    new_audio_file = DetectedFiles(filename=file, transcription=transcription, 
+                                                    completed=1, foul_lang=1)
+                    upload_to_db(new_audio_file)
+                    
 
     return render_template("audio_list.html", audio_files=list_audio_files, transcribed=is_transcribed,
                            transcriptions=transcriptions, is_bad=is_bad)
 
+@app.route("/detected_audio")
+def detected_audio():
+    audio_files = DetectedFiles.query.all()
+    if len(audio_files) == 0:
+        audio_file = DetectedFiles(filename="Test", transcription="Bodoh kamu", completed=0, foul_lang=1)
+        upload_to_db(audio_file)
+    return render_template("detected_audio_list.html", files=DetectedFiles.query.all())
+
 @app.route("/upload_file", methods=['POST', 'GET'])
 def upload_file():
-    if request.method == 'POST':
-        print("Hello!")
-    """
-    print("File uploaded!")
-    if not allowed_file(uploaded_file.filename):
-        print("File not allowed. Redirecting to previous page")
-        return redirect("/audio_list")
-    else:
-        main.s3_client.upload_fileobj(uploaded_file, main.s3_uri_bucket, uploaded_file.filename)
-        print("File successfully uploaded!")
-        return redirect("/audio_list")
-    """
+    #For now, just redirect to the audio list page
     return redirect("/audio_list")
 
 @app.route("/delete_file", methods=['POST', 'GET'])
@@ -115,6 +123,10 @@ def delete_file():
         if transcribe.get_transcribe_job(main.transcribe_client, file_name) != None:
             transcribe.delete_transcribe_job(main.transcribe_client, file_name)
         s3.delete_file(main.s3_client, main.s3_uri_bucket, file_name)
+
+        #Delete file from DB too, if it exists
+        DetectedFiles.query.filter_by(filename=file_name).delete()
+        db.session.commit()
         return redirect("/audio_list")
     else:
         return redirect("/audio_list")
@@ -137,6 +149,4 @@ def upload_page():
 @app.route("/about")
 def about_page():
     return render_template("about.html")
-
-
     
