@@ -1,7 +1,10 @@
 import sys
+import subprocess
+import os
 sys.path.append('..')
 
 from flask import Flask, render_template, url_for, request, redirect
+from werkzeug.utils import secure_filename
 from tkinter.filedialog import askopenfilename
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -37,6 +40,13 @@ class UnwantedWords(db.Model):
 
     def __repr__(self):
         return'<UnwantedWords %r>' % self.word
+    
+class MarkedAudioFiles(db.Model):
+    filename = db.Column(db.String(50), primary_key=True)
+    data = db.Column(db.LargeBinary)
+
+    def __repr__(self):
+        return '<MarkedAudioFiles %r>' % self.filename
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -116,12 +126,21 @@ def index():
 @app.route("/assessment")
 def detected_audio():
     audio_files = DetectedFiles.query.all()
-    return render_template("detected_audio_list.html", files=DetectedFiles.query.all())
+    return render_template("detected_audio_list.html", files=DetectedFiles.query.all(), filename="", filelink="")
 
 @app.route("/upload_file", methods=['POST', 'GET'])
 def upload_file():
-    #For now, just redirect to the audio list page
-    return redirect("/audio_list")
+    try:
+        if request.method == 'POST':
+            fileobj = request.files['file-to-save']
+            #Makes sure file name is secure from SQL Injections
+            new_filename = secure_filename(fileobj.filename)
+            if s3.upload_fileobj(main.s3_client, fileobj, main.s3_uri_bucket, new_filename):
+                return render_template("/upload.html", msg="Y")
+            else:
+                return render_template("upload.html", msg="N")
+    except botocore.exceptions.ParamValidationError:
+        return render_template("upload.html", msg="NoFile")
 
 @app.route("/transcribe_file", methods=['POST', 'GET'])
 def transcribe_file():
@@ -197,9 +216,18 @@ def revert_assessment():
 @app.route("/download_file", methods=['POST'])
 def download_file():
     if request.method == 'POST':
-        file_name = request.form['filename']
-        s3.download_file(main.s3_client, main.s3_uri_bucket, file_name)
-    return redirect("/assessment")
+        command = 'aws s3 presign s3://' + main.s3_uri_bucket + '/' + request.form['filename'] + ' --expires-in 15'
+        output = os.popen(command).read()
+        #proc = subprocess.Popen(["aws", "s3", "presign", "s3://" + main.s3_uri_bucket + "/" + request.form['filename'],
+        #                         "--expires-in", '30'], stdout=subprocess.PIPE, shell=True)
+        #(out, err) = proc.communicate()
+        #print(output)
+        #file = request.
+
+        #marked_audio_file = MarkedAudioFiles(filename=request.form['filename'], data=)
+        
+    return render_template("detected_audio_list.html", files=DetectedFiles.query.all(), filename=request.form['filename'],
+                            filelink=output)
     
 @app.route("/upload")
 def upload_page():

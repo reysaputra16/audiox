@@ -20,7 +20,27 @@
     </ul>
 </nav>
 <div class="content">
-    <h1>Upload</h1>
+    <h1 style="text-align: center;">Upload</h1>
+    <br><br>
+    <h2>Here you can upload single audio files to be prepared for transcription</h2>
+    <br><br>
+    <p>NOTE: File names must be distinct! That means that new files with an existing name will not be uploaded!</p>
+    <br>
+    <form style="padding:5px;padding-bottom: 10px;" enctype="multipart/form-data" action="/upload_file" method="POST">
+        <label for="file-to-save" class="button">Choose File Here</label>
+        <input type="file" name="file-to-save" id="file-to-save">
+        <input type="submit" value="Add Audio File">
+    </form>
+
+    <br><br>
+
+    {% if msg == "Y" %}
+        <p style="color: green">Upload Successful!</p>
+    {% elif msg == "N" %}
+        <p style="color: red">Upload failed!</p>
+    {% elif msg == "NoFile" %}
+        <p style="color: orange">No file was selected!</p>
+    {% endif %}
 </div>
 
 {% endblock %}

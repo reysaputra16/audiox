@@ -46,6 +46,19 @@ def upload_file(fileLoc, s3_client, bucket_name, objName):
     else:
         print("File successfully uploaded!")
 
+def upload_fileobj(s3_client, data, bucket_name, key_name):
+    try:
+        objList = list_objects(bucket_name, s3_client)
+        if key_name in objList:
+            print("File already exists.. Cancelling upload attempt...")
+            return False
+        else:
+            s3_client.upload_fileobj(data, bucket_name, key_name)
+            return True
+    except botoe.ClientError:
+        print("Problem with uploading..")
+        return False
+
 def delete_file(s3_client, bucket_name, key_name):
     try:
         s3_client.delete_object(Bucket=bucket_name, Key=key_name)

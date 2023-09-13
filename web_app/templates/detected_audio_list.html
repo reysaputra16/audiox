@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>Detected | AudioX</title>
+<title>Assessment | AudioX</title>
 {% endblock %}
 
 {% block body %}
@@ -21,7 +21,13 @@
 </nav>
 <div class="content">
     <h1 style="text-align: center;">Assessment</h1>
-
+    
+    {% if filename != "" %}
+        <br>
+        <p>File {{ filename }} is ready to be downloaded. The link below is only available for 15 seconds</p>
+        <a href="{{ filelink }}" download>Click here to download audio file</a>
+        <br>
+    {% endif %}
     <table>
         <tr>
             <th>File Name</th>
@@ -49,6 +55,10 @@
                 {% endif %}
                 <td>{{ file.transcription }}</td>
                 <td>
+                    <form action="/download_file" method="post">
+                        <input type="hidden" name="filename" value="{{ file.filename }}">
+                        <input type="submit" value="Download File">
+                    </form>
                     {% if file.completed == 1 %}
                         <form action="/no_foul_language" method="post">
                             <input type="hidden" name="filename" value="{{ file.filename }}">
