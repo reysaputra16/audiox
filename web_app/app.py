@@ -268,4 +268,7 @@ def remove_word():
         UnwantedWords.query.filter_by(word=new_word).delete()
         db.session.commit()
     return redirect("/about")
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
     
