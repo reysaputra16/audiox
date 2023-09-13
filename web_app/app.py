@@ -270,5 +270,7 @@ def remove_word():
     return redirect("/about")
 
 if __name__ == "__main__":
+    db.drop_all()
+    db.create_all()
     app.run(host='0.0.0.0', port=5000)
     
