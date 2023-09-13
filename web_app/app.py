@@ -115,7 +115,7 @@ def index():
                     new_audio_file = DetectedFiles(filename=file, transcription=transcription, 
                                                     completed=1, foul_lang=2)
                     upload_to_db(new_audio_file)
-                    s3.download_file(main.s3_client, main.s3_uri_bucket, file)
+                    #s3.download_file(main.s3_client, main.s3_uri_bucket, file)
                     
 
     return render_template("audio_list.html", audio_files=list_audio_files, transcribed=is_transcribed,
