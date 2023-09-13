@@ -7,7 +7,6 @@ from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import botocore
-from app import db
 
 import amazon_func_main as main
 import amazon_func_s3 as s3
@@ -22,8 +21,6 @@ with app.app_context():
     """
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
     db = SQLAlchemy(app)
-    db.drop_all()
-    db.create_all()
 
 class DetectedFiles(db.Model):
     id = db.Column(db.Integer, autoincrement=True)
