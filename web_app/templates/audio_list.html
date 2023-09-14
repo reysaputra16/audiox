@@ -43,14 +43,19 @@
                     <td><span style="color:purple;font-size:medium">{{ transcribed[loop.index0] }}</span></td>
                 {% endif %}
                     {% if is_bad[loop.index0] == 'Y' %}
-                        <td><span style="color:red;font-size:medium">Detected. See Assessment</span></td>
+                        <td><span style="color:red;font-size:medium">Yes</span></td>
                     {% elif is_bad[loop.index0] == 'U' %}
                         <td><span style="color:grey;font-size:medium">Unknown</span></td>
-                    {% else %}
+                    {% elif is_bad[loop.index0] == 'N' %}
                         <td><span style="color:green;font-size:medium">No</span></td>
+                    {% else %}
+                        <td><span style="color:orange;font-size:medium">Marked for Assessment</span></td>
                     {% endif %}
                 <td>
-                    <p>{{ transcriptions[loop.index0] }}</p>
+                    <button type="button" class="collapsible">Show/Hide Transcription</button>
+                    <div class="content-transcription">
+                        <p>{{ transcriptions[loop.index0] }}</p>
+                    </div>
                 </td>
                 <td>
                     <form action="/transcribe_file" method="post">
@@ -69,4 +74,20 @@
         {% endfor %}
     </table>
 </div>
+<script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+    
+    for (i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block") {
+          content.style.display = "none";
+        } else {
+          content.style.display = "block";
+        }
+      });
+    }
+</script>
 {% endblock %}

@@ -129,6 +129,29 @@ table {
     padding: 25px;
 }
 
+.collapsible {
+    background-color: rgb(141, 204, 229);
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+}
+
+.active, .collapsible:hover {
+    background-color: rgb(86, 181, 219)
+}
+
+.content-transcription {
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+    background-color: #f1f1f1;
+}
+
 .button {
     border: none;
     color: white;
@@ -167,5 +190,11 @@ table {
 .button-deep-pink {background-color: white; color:black;border: 2px solid deeppink} /* Red */
 .button-deep-pink:hover {
     background-color:deeppink;
+    color: white;
+}
+
+.button-sky-blue {background-color: white; color: black;border: 2px solid skyblue;} /*Sky blue */
+.button-sky-blue:hover {
+    background-color: skyblue;
     color: white;
 }

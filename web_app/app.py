@@ -110,12 +110,22 @@ def index():
                 transcriptions.append(transcription)
                 split_transcription = transcription.split(" ")
                 bool_append = check_unwanted_words(split_transcription)
-                is_bad.append(bool_append)
                 if bool_append == 'Y':
-                    new_audio_file = DetectedFiles(filename=file, transcription=transcription, 
-                                                    completed=1, foul_lang=2)
-                    upload_to_db(new_audio_file)
-                    #s3.download_file(main.s3_client, main.s3_uri_bucket, file)
+                    existing_file = DetectedFiles.query.filter_by(filename=file).first()
+                    if existing_file == None:
+                        new_audio_file = DetectedFiles(filename=file, transcription=transcription, 
+                                                        completed=1, foul_lang=2)
+                        upload_to_db(new_audio_file)
+                        is_bad.append('M')
+                    else:
+                        if existing_file.foul_lang == 1:
+                            is_bad.append('Y')
+                        elif existing_file.foul_lang == 0:
+                            is_bad.append('N')
+                        else: #The only other case is if foul_lang = 2
+                            is_bad.append('M')
+                else:
+                    is_bad.append('N')
                     
 
     return render_template("audio_list.html", audio_files=list_audio_files, transcribed=is_transcribed,
