@@ -7,8 +7,8 @@ import json
 import sys
 
 AWS_REGION = 'ap-southeast-1'
-s3_client = boto3.client('s3')
-transcribe_client = boto3.client('transcribe')
+s3_client = boto3.client('s3', region_name=AWS_REGION)
+transcribe_client = boto3.client('transcribe', region_name=AWS_REGION)
 s3_uri_bucket = "transcribebucket-sisnet"
 s3_uri_root = "s3://" + s3_uri_bucket
 mediaFormat = 'mp3'
