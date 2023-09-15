@@ -56,6 +56,34 @@ Once the installation is done, you can confirm by checking the version using thi
 pip3 --version
 ```
 
+### Installing Flask ###
+This application uses Flask to create a web application in the form of Python code. We will start by installing Flask
+```bash
+pip install flask
+```
+Install SQLAlchemy as well
+```bash
+pip install flask-sqlalchemy
+```
+
+### Installing Boto3 ###
+Boto3 is an AWS SDK for Python that is specifically designed to manage our created instances on the AWS platform. We will require this to make API calls to the AWS platform.
+```bash
+pip install boto3
+```
+
+### Running the application ###
+Before running our application, there are still a few configurations that needs to be done before being able to have our application fully functioning.
+
+Firstly, the AWS default region must be set. There are many ways to do this, but we will be setting it directly on the environment variable
+```bash
+export AWS_DEFAULT_REGION=ap-southeast-1
+```
+The AWS default region can be chosen to your preference, but I use the *ap-southeast-1* region as default.
+
+Next, the database needs to be set up before being able to fully use the application
+
+
 
 
 
