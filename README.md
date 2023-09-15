@@ -40,7 +40,7 @@ We are now inside our virtual environment and with this virtual environment, any
 
 The application runs mainly on Python on the backend, so we will need to install Flask and SQLAlchemy. We can run the following code to install the packages
 
-###(Installing pip)
+### Installing pip ###
 Start by updating the package list
 ```bash
 sudo apt update
