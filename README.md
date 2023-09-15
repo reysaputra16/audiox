@@ -75,13 +75,30 @@ pip install boto3
 ### Running the application ###
 Before running our application, there are still a few configurations that needs to be done before being able to have our application fully functioning.
 
-Firstly, the AWS default region must be set. There are many ways to do this, but we will be setting it directly on the environment variable
+The database needs to be set up before being able to fully use the application
+Run the code below to open python
 ```bash
-export AWS_DEFAULT_REGION=ap-southeast-1
+flask shell
 ```
-The AWS default region can be chosen to your preference, but I use the *ap-southeast-1* region as default.
+Once the command is entered, python will show up and we will prepare the database using this
+```python
+from app import db
+```
+```python
+db.create_all()
+```
+What we are putting into the python console is that it will prepare our database and create all the table for us. The database tables are already defined in web_app/app.py
 
-Next, the database needs to be set up before being able to fully use the application
+Type the command below to exit python
+```python
+exit()
+```
+
+Then finally you can run the application
+```bash
+python3 app.py
+```
+Setup is complete and you can access the website through the public IP address at port 5000!
 
 
 
