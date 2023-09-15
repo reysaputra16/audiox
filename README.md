@@ -19,15 +19,7 @@ Another thing is to make sure that the **Amazon S3 Bucket** and **Amazon Transcr
 ## Setup
 A virtual environment will be made in order to not tamper with other source files on the local computer. This will ease the use of the required packages for this application
 
-First, let us set up the AWS credentials
-```bash
-aws configure
-```
-A command will show up to enter your secret access key obtained from AWS. Make sure to fill that in. The AWS region should match with the region where your AWS instances (S3 Bucket and Transcribe) is.
-
-Now we have access to our AWS account and therefore we can make API calls. Note that depending on how much access you have from accessing your account through the terminal completely depends on how you set up your access key.
-
-Next, let us set up our virtual environment. We need to move into the repository
+First, let us set up our virtual environment. We need to move into the repository
 ```bash
 cd audiox/web_app
 ```
@@ -55,6 +47,20 @@ Once the installation is done, you can confirm by checking the version using thi
 ```bash
 pip3 --version
 ```
+
+### Installing AWS CLI ###
+Install AWS CLI with this code
+```bash
+sudo apt install awscli
+```
+
+Then set up the AWS credentials
+```bash
+aws configure
+```
+A command will show up to enter your secret access key obtained from AWS. Make sure to fill that in. The AWS region should match with the region where your AWS instances (S3 Bucket and Transcribe) is.
+
+Now we have access to our AWS account and therefore we can make API calls. Note that depending on how much access you have from accessing your account through the terminal completely depends on how you set up your access key.
 
 ### Installing Flask ###
 This application uses Flask to create a web application in the form of Python code. We will start by installing Flask
