@@ -16,6 +16,13 @@ The following requirements are as follows:
 
 Another thing is to make sure that the **Amazon S3 Bucket** and **Amazon Transcribe** remains empty, so to ensure no performance issue with the application itself.
 
+## Credentials
+Please put in the required credentials in order for the application to work. Follow the following format below:
+```
+TRANSCRIBEBUCKET=mys3bucketname
+AWS_REGION=ap-southeast-1
+```
+
 ## Setup
 A virtual environment will be made in order to not tamper with other source files on the local computer. This will ease the use of the required packages for this application
 
