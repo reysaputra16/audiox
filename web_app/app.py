@@ -280,5 +280,6 @@ def remove_word():
     return redirect("/about")
 
 if __name__ == "__main__":
+    main.addCredentials()
     app.run(host='0.0.0.0', port=5000)
     

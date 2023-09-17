@@ -6,10 +6,10 @@ import urllib.request
 import json
 import sys
 
-AWS_REGION = 'ap-southeast-1'
+AWS_REGION = ''
 s3_client = boto3.client('s3', region_name=AWS_REGION)
 transcribe_client = boto3.client('transcribe', region_name=AWS_REGION)
-s3_uri_bucket = "transcribebucket-sisnet"
+s3_uri_bucket = ''
 s3_uri_root = "s3://" + s3_uri_bucket
 mediaFormat = 'mp3'
 languageCode = 'id-ID'
@@ -21,6 +21,16 @@ Step 2 : Create transcribe jobs by using the key of
 Step 3 : With the transcribe jobs name using key, it would be easier to 
         associate the jobs with the original audio file name
 """
+
+def addCredentials():
+    with open("credentials.txt") as creds:
+        while data := creds.readline() != '':
+            data = data.split('=')
+            if data[0] == 'TRANSCRIBEBUCKET':
+                s3_uri_bucket = data[1]
+            elif data[0] == 'AWS_REGION':
+                AWS_REGION = data[1]
+        creds.close()
 
 #Create transcribe jobs for audios that have not been transcribed (takes all files from the bucket)
 def create_transcribe_jobs():
