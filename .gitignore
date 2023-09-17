@@ -163,3 +163,4 @@ cython_debug/
 .DS_Store
 web_app/.DS_Store
 web_app/wsgi.py
+credentials.txt
