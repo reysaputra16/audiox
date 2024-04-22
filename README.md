@@ -1,9 +1,11 @@
 # AudioX
 
-AudioX is an application that transcribes audio files and attempts to detect foul language in the audio.
+AudioX is an application that transcribes audio files and attempts to detect foul language in the audio. This project was an implementation based on a real-world case for a client in Indonesia. The client was part of a customer service team that needed to process many recorded calls that may be under the suspicion of harrassment. The implementation made here is that it would be able to process many recordings and flag any recordings that contained foul language.
+
+**DISCLAIMER**: The project is still under works, so there may be bugs that may turn up when you try to run the application. Feel free to use the application for your own use, but please be aware that there are no guarantees that this application can run in a secure manner. Until then, use at own risk.
 
 ## Prerequisites
-In order to start using the application, there are certain requirements that are needed before starting the application. Because it uses technology from AWS, it requires some setup in order to get started.
+In order to start using the application, there are certain requirements that are needed before starting the application. Because it uses Amazon Web Service (AWS), it requires some setup in order to get started.
 
 The following requirements are as follows:
 * pip (on terminal of your choice, so that the packages can be installed)
